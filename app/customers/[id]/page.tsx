@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { ActivityFeed } from "@/components/collections/activity-feed";
 import { PageHeader } from "@/components/page-header";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -31,6 +32,8 @@ export default async function AccountDetailPage({ params }: { params: Promise<{ 
   if (!customer) notFound();
 
   const overdue = overdueBook(customer.invoices);
+  const lastActivityOn = (invoiceId: string) =>
+    customer.activities.find((activity) => activity.invoiceId === invoiceId)?.occurredOn;
 
   return (
     <div className="mx-auto flex max-w-5xl flex-col gap-6">
@@ -68,7 +71,9 @@ export default async function AccountDetailPage({ params }: { params: Promise<{ 
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {overdue.map((invoice) => (
+                {overdue.map((invoice) => {
+                  const lastOn = lastActivityOn(invoice.id);
+                  return (
                   <TableRow key={invoice.id}>
                     <TableCell>
                       <Link
@@ -84,12 +89,23 @@ export default async function AccountDetailPage({ params }: { params: Promise<{ 
                     <TableCell className="text-right font-medium">
                       {formatUsd(outstandingCents(invoice))}
                     </TableCell>
-                    <TableCell className="text-muted-foreground">—</TableCell>
+                    <TableCell className="text-muted-foreground">{lastOn ? formatDate(lastOn) : "—"}</TableCell>
                   </TableRow>
-                ))}
+                  );
+                })}
               </TableBody>
             </Table>
           )}
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Activity</CardTitle>
+          <CardDescription>Payments, notes, and Nudges on this account, newest first.</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <ActivityFeed activities={customer.activities} />
         </CardContent>
       </Card>
     </div>

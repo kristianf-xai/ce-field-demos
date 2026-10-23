@@ -15,6 +15,7 @@ const invoiceInclude = {
   customer: true,
   lines: true,
   disputes: true,
+  payments: { orderBy: { createdAt: "asc" } },
 } as const;
 
 const disputeInclude = {
@@ -143,7 +144,7 @@ export async function getOpenDisputeNotices() {
 
 export async function getCustomers() {
   return prisma.customer.findMany({
-    include: { invoices: true },
+    include: { invoices: { include: { payments: true } } },
     orderBy: { name: "asc" },
   });
 }
@@ -151,7 +152,13 @@ export async function getCustomers() {
 export async function getCustomerAccount(id: string) {
   return prisma.customer.findUnique({
     where: { id },
-    include: { invoices: { orderBy: { dueOn: "asc" } } },
+    include: {
+      invoices: { include: { payments: true }, orderBy: { dueOn: "asc" } },
+      activities: {
+        include: { invoice: { select: { number: true } } },
+        orderBy: { createdAt: "desc" },
+      },
+    },
   });
 }
 
