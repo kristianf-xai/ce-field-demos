@@ -1,6 +1,6 @@
 import { DEMO_AS_OF } from "@/lib/clock";
-import { daysBetween } from "@/lib/dates";
-import { sumCents } from "@/lib/money";
+import { daysBetween, formatDate } from "@/lib/dates";
+import { formatUsd, sumCents } from "@/lib/money";
 
 type InvoiceLike = {
   status: string;
@@ -27,6 +27,7 @@ export function isPaymentMethod(value: unknown): value is PaymentMethod {
 export const ACTIVITY_LABEL: Record<string, string> = {
   PAYMENT_RECORDED: "Payment recorded",
   NOTE_ADDED: "Note added",
+  NUDGE_SENT: "Nudge",
 };
 
 /** Stand-in for the PRD's unspecified edit window. Measured from createdAt, not the demo clock. */
@@ -50,6 +51,31 @@ export function overdueBook<T extends Pick<InvoiceLike, "status" | "dueOn">>(inv
   return invoices
     .filter((invoice) => invoice.status === "OVERDUE")
     .sort((a, b) => daysPastDue(b, asOf) - daysPastDue(a, asOf));
+}
+
+/** The account-level Nudge goes to the most-past-due overdue invoice. */
+export function accountNudgeTarget<T extends Pick<InvoiceLike, "status" | "dueOn">>(
+  invoices: T[],
+  asOf: Date = DEMO_AS_OF,
+): T | undefined {
+  return overdueBook(invoices, asOf)[0];
+}
+
+/** Fixed v1 reminder. No custom composition. */
+export function nudgeTemplate(input: {
+  contactName: string;
+  invoiceNumber: string;
+  outstandingCents: number;
+  dueOn: Date;
+  senderName: string;
+  workspaceName: string;
+}) {
+  return [
+    `Hi ${input.contactName},`,
+    `Invoice ${input.invoiceNumber} for ${formatUsd(input.outstandingCents)} was due ${formatDate(input.dueOn)} and is still open.`,
+    "Please arrange payment, or reply if something is holding it up.",
+    `${input.senderName}, ${input.workspaceName}`,
+  ].join("\n");
 }
 
 /** What the customer still owes. Only OPEN and OVERDUE invoices carry a balance. */

@@ -69,5 +69,13 @@ function ActivityDetail({ activity }: { activity: FeedActivity }) {
       </p>
     );
   }
+  if (activity.type === "NUDGE_SENT") {
+    return (
+      <div className="mt-1 space-y-1 text-sm">
+        <p className="text-xs text-muted-foreground">Channel: {activity.channel ?? "email"}</p>
+        {activity.detail ? <p className="whitespace-pre-line">{activity.detail}</p> : null}
+      </div>
+    );
+  }
   return activity.detail ? <p className="mt-1 text-sm whitespace-pre-line">{activity.detail}</p> : null;
 }
