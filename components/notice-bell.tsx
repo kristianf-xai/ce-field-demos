@@ -21,13 +21,19 @@ export function NoticeBell({
 }) {
   const [open, setOpen] = useState(false);
   const root = useRef<HTMLDivElement>(null);
+  const trigger = useRef<HTMLButtonElement>(null);
+  const panel = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     function onPointer(event: PointerEvent) {
       if (!root.current?.contains(event.target as Node)) setOpen(false);
     }
     function onKey(event: KeyboardEvent) {
-      if (event.key === "Escape") setOpen(false);
+      if (event.key !== "Escape") return;
+      // The focused link unmounts with the panel, so focus would fall to body.
+      const focusInPanel = panel.current?.contains(document.activeElement) ?? false;
+      setOpen(false);
+      if (focusInPanel) trigger.current?.focus();
     }
     document.addEventListener("pointerdown", onPointer);
     document.addEventListener("keydown", onKey);
@@ -40,6 +46,7 @@ export function NoticeBell({
   return (
     <div ref={root} className="relative">
       <button
+        ref={trigger}
         type="button"
         className="relative rounded-full p-2 text-muted-foreground hover:bg-muted hover:text-foreground"
         aria-label="Open exceptions"
@@ -52,7 +59,10 @@ export function NoticeBell({
         ) : null}
       </button>
       {open ? (
-        <div className="absolute top-11 right-0 z-30 w-80 rounded-[var(--radius-lg)] border border-border bg-card p-3 shadow-[var(--shadow-card)]">
+        <div
+          ref={panel}
+          className="absolute top-11 right-0 z-30 w-80 rounded-[var(--radius-lg)] border border-border bg-card p-3 shadow-[var(--shadow-card)]"
+        >
           <p className="text-xs font-medium tracking-[0.14em] text-muted-foreground uppercase">
             Open exceptions
           </p>
