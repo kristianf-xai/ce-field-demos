@@ -18,32 +18,33 @@ model Workspace {
 }
 
 model Customer {
-  id          String     @id
+  id          String           @id
   workspaceId String
-  workspace   Workspace  @relation(fields: [workspaceId], references: [id])
+  workspace   Workspace        @relation(fields: [workspaceId], references: [id])
   name        String
   contactName String
   email       String
   plan        String
-  createdAt   DateTime   @default(now())
+  createdAt   DateTime         @default(now())
   invoices    Invoice[]
   activities  Activity[]
+  notes       CollectionNote[]
 }
 
 model Invoice {
-  id             String        @id
-  number         String        @unique
+  id             String           @id
+  number         String           @unique
   workspaceId    String
-  workspace      Workspace     @relation(fields: [workspaceId], references: [id])
+  workspace      Workspace        @relation(fields: [workspaceId], references: [id])
   customerId     String
-  customer       Customer      @relation(fields: [customerId], references: [id])
+  customer       Customer         @relation(fields: [customerId], references: [id])
   plan           String
   status         String
   issuedOn       DateTime
   dueOn          DateTime
   paidOn         DateTime?
   subtotalCents  Int
-  taxCents       Int           @default(0)
+  taxCents       Int              @default(0)
   totalCents     Int
   memo           String?
   collectionNote String?
@@ -51,6 +52,20 @@ model Invoice {
   disputes       Dispute[]
   payments       Payment[]
   activities     Activity[]
+  notes          CollectionNote[]
+}
+
+model CollectionNote {
+  id         String    @id @default(cuid())
+  customerId String
+  customer   Customer  @relation(fields: [customerId], references: [id])
+  invoiceId  String?
+  invoice    Invoice?  @relation(fields: [invoiceId], references: [id])
+  authorName String
+  body       String
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+  activity   Activity?
 }
 
 model Payment {
@@ -66,11 +81,11 @@ model Payment {
 
 /// One account feed for every collections touch. occurredOn is the demo day; createdAt orders the feed.
 model Activity {
-  id          String   @id @default(cuid())
+  id          String          @id @default(cuid())
   customerId  String
-  customer    Customer @relation(fields: [customerId], references: [id])
+  customer    Customer        @relation(fields: [customerId], references: [id])
   invoiceId   String?
-  invoice     Invoice? @relation(fields: [invoiceId], references: [id])
+  invoice     Invoice?        @relation(fields: [invoiceId], references: [id])
   type        String
   status      String
   actorName   String
@@ -79,7 +94,9 @@ model Activity {
   method      String?
   channel     String?
   detail      String?
-  createdAt   DateTime @default(now())
+  noteId      String?         @unique
+  note        CollectionNote? @relation(fields: [noteId], references: [id])
+  createdAt   DateTime        @default(now())
 }
 
 model InvoiceLine {

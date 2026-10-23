@@ -15,6 +15,7 @@ export type FeedActivity = {
   channel: string | null;
   detail: string | null;
   invoice: { number: string } | null;
+  note: { id: string; body: string; authorName: string; createdAt: Date; updatedAt: Date } | null;
 };
 
 export function ActivityFeed({ activities }: { activities: FeedActivity[] }) {
@@ -47,6 +48,9 @@ export function ActivityFeed({ activities }: { activities: FeedActivity[] }) {
 }
 
 function ActivityDetail({ activity }: { activity: FeedActivity }) {
+  if (activity.type === "NOTE_ADDED" && activity.note) {
+    return <p className="mt-1 text-sm whitespace-pre-line">{activity.note.body}</p>;
+  }
   if (activity.type === "PAYMENT_RECORDED" && activity.amountCents !== null) {
     const method = isPaymentMethod(activity.method) ? PAYMENT_METHOD_LABEL[activity.method] : activity.method;
     return (

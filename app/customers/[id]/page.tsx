@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ActivityFeed } from "@/components/collections/activity-feed";
+import { NoteForm } from "@/components/collections/note-form";
 import { PageHeader } from "@/components/page-header";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -104,7 +105,11 @@ export default async function AccountDetailPage({ params }: { params: Promise<{ 
           <CardTitle>Activity</CardTitle>
           <CardDescription>Payments, notes, and Nudges on this account, newest first.</CardDescription>
         </CardHeader>
-        <CardContent>
+        <CardContent className="space-y-6">
+          <NoteForm
+            customerId={customer.id}
+            invoices={customer.invoices.map((invoice) => ({ id: invoice.id, number: invoice.number }))}
+          />
           <ActivityFeed activities={customer.activities} />
         </CardContent>
       </Card>

@@ -26,6 +26,7 @@ export function isPaymentMethod(value: unknown): value is PaymentMethod {
 
 export const ACTIVITY_LABEL: Record<string, string> = {
   PAYMENT_RECORDED: "Payment recorded",
+  NOTE_ADDED: "Note added",
 };
 
 export function daysPastDue(invoice: Pick<InvoiceLike, "status" | "dueOn">, asOf: Date = DEMO_AS_OF) {

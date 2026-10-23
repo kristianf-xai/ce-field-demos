@@ -155,8 +155,8 @@ export async function getCustomerAccount(id: string) {
     include: {
       invoices: { include: { payments: true }, orderBy: { dueOn: "asc" } },
       activities: {
-        include: { invoice: { select: { number: true } } },
-        orderBy: { createdAt: "desc" },
+        include: { invoice: { select: { number: true } }, note: true },
+        orderBy: [{ createdAt: "desc" }, { id: "desc" }],
       },
     },
   });
