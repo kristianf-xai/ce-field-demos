@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { DEMO_AS_OF } from "@/lib/clock";
-import { nudgeTemplate, outstandingCents } from "@/lib/collections";
+import { nudgeEmailProblem, nudgeTemplate, outstandingCents } from "@/lib/collections";
 import { DEMO_OPERATOR } from "@/lib/demo-session";
 import { prisma } from "@/lib/prisma";
 
@@ -28,18 +28,23 @@ export async function POST(_request: Request, { params }: { params: Promise<{ id
     workspaceName: DEMO_OPERATOR.workspace,
   });
 
+  const problem = nudgeEmailProblem(recipient);
+
   const activity = await prisma.activity.create({
     data: {
       customerId: invoice.customerId,
       invoiceId: invoice.id,
       type: "NUDGE_SENT",
-      status: "sent",
+      status: problem ? "failed" : "sent",
       actorName: DEMO_OPERATOR.name,
       occurredOn: DEMO_AS_OF,
       channel: "email",
-      detail: message,
+      detail: problem ? `Not sent. ${problem}\n\n${message}` : message,
     },
   });
 
-  return NextResponse.json({ status: activity.status, recipient, activity }, { status: 201 });
+  if (problem) {
+    return NextResponse.json({ status: "failed", error: problem, recipient, activity });
+  }
+  return NextResponse.json({ status: "sent", recipient, activity }, { status: 201 });
 }

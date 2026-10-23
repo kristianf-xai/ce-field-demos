@@ -14,8 +14,14 @@ const post = (id: string) =>
     params: Promise.resolve({ id }),
   });
 
+let seededEmail: string | null = null;
+
 afterEach(async () => {
   await prisma.activity.deleteMany({ where: { invoiceId: { in: [INVOICE_ID, PAID_INVOICE_ID] } } });
+  if (seededEmail !== null) {
+    await prisma.customer.update({ where: { id: CUSTOMER_ID }, data: { email: seededEmail } });
+    seededEmail = null;
+  }
 });
 
 describe("POST /api/invoices/[id]/nudge", () => {
@@ -42,6 +48,26 @@ describe("POST /api/invoices/[id]/nudge", () => {
     expect(activities[0].detail).toContain(invoice.number);
     expect(activities[0].detail).toContain(formatUsd(invoice.totalCents));
     expect(activities[0].detail).toContain(formatDate(invoice.dueOn));
+  });
+
+  it("logs NUDGE_SENT as failed and reports it when the email is missing or not an address", async () => {
+    const customer = await prisma.customer.findUniqueOrThrow({ where: { id: CUSTOMER_ID } });
+    seededEmail = customer.email;
+
+    for (const email of ["", "billing at blueharbor"]) {
+      await prisma.customer.update({ where: { id: CUSTOMER_ID }, data: { email } });
+      const response = await post(INVOICE_ID);
+      expect(response.ok).toBe(true);
+      const body = await response.json();
+      expect(body.status).toBe("failed");
+      expect(body.error).toEqual(expect.any(String));
+    }
+
+    const activities = await prisma.activity.findMany({ where: { invoiceId: INVOICE_ID } });
+    expect(activities).toHaveLength(2);
+    for (const activity of activities) {
+      expect(activity).toMatchObject({ type: "NUDGE_SENT", status: "failed", channel: "email" });
+    }
   });
 
   it("refuses an invoice that is not overdue and logs nothing", async () => {

@@ -61,6 +61,14 @@ export function accountNudgeTarget<T extends Pick<InvoiceLike, "status" | "dueOn
   return overdueBook(invoices, asOf)[0];
 }
 
+/** Why a Nudge cannot be emailed, or null when the on-file address looks deliverable. */
+export function nudgeEmailProblem(email: string): string | null {
+  const trimmed = email.trim();
+  if (!trimmed) return "No email on file.";
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmed)) return `"${trimmed}" is not an email address.`;
+  return null;
+}
+
 /** Fixed v1 reminder. No custom composition. */
 export function nudgeTemplate(input: {
   contactName: string;
