@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { FileText, MoreHorizontal } from "lucide-react";
+import { FileText } from "lucide-react";
 import { InvoiceStatusBadge } from "@/components/status-badge";
 import {
   Table,
@@ -45,9 +45,6 @@ export function InvoiceTable({ invoices }: { invoices: InvoiceRow[] }) {
           <TableHead>Due date</TableHead>
           <TableHead className="text-right">Amount</TableHead>
           <TableHead>Status</TableHead>
-          <TableHead className="w-10">
-            <span className="sr-only">Actions</span>
-          </TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>
@@ -67,15 +64,6 @@ export function InvoiceTable({ invoices }: { invoices: InvoiceRow[] }) {
             <TableCell className="text-right font-medium">{formatUsd(invoice.totalCents)}</TableCell>
             <TableCell>
               <InvoiceStatusBadge status={displayInvoiceStatus(invoice)} />
-            </TableCell>
-            <TableCell>
-              <Link
-                href={`/invoices/${invoice.id}`}
-                className="inline-flex size-8 items-center justify-center rounded-md text-muted-foreground hover:bg-muted hover:text-foreground"
-                aria-label={`Open ${invoice.number}`}
-              >
-                <MoreHorizontal className="size-4" />
-              </Link>
             </TableCell>
           </TableRow>
         ))}
