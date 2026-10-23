@@ -13,9 +13,10 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { daysPastDue, overdueBook, outstandingCents } from "@/lib/collections";
+import { canEditNote, daysPastDue, overdueBook, outstandingCents } from "@/lib/collections";
 import { getCustomerAccount } from "@/lib/data";
 import { formatDate } from "@/lib/dates";
+import { DEMO_OPERATOR } from "@/lib/demo-session";
 import { formatUsd } from "@/lib/money";
 import { isPlanId, planLabel } from "@/lib/plans";
 
@@ -33,6 +34,10 @@ export default async function AccountDetailPage({ params }: { params: Promise<{ 
   if (!customer) notFound();
 
   const overdue = overdueBook(customer.invoices);
+  const now = new Date();
+  const editableNoteIds = customer.activities.flatMap((activity) =>
+    activity.note && canEditNote(activity.note, DEMO_OPERATOR.name, now) ? [activity.note.id] : [],
+  );
   const lastActivityOn = (invoiceId: string) =>
     customer.activities.find((activity) => activity.invoiceId === invoiceId)?.occurredOn;
 
@@ -110,7 +115,7 @@ export default async function AccountDetailPage({ params }: { params: Promise<{ 
             customerId={customer.id}
             invoices={customer.invoices.map((invoice) => ({ id: invoice.id, number: invoice.number }))}
           />
-          <ActivityFeed activities={customer.activities} />
+          <ActivityFeed activities={customer.activities} editableNoteIds={editableNoteIds} />
         </CardContent>
       </Card>
     </div>

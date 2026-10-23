@@ -1,3 +1,4 @@
+import { NoteEditor } from "@/components/collections/note-editor";
 import { Badge } from "@/components/ui/badge";
 import { ACTIVITY_LABEL, isPaymentMethod, PAYMENT_METHOD_LABEL } from "@/lib/collections";
 import { formatDate, formatTime } from "@/lib/dates";
@@ -18,7 +19,13 @@ export type FeedActivity = {
   note: { id: string; body: string; authorName: string; createdAt: Date; updatedAt: Date } | null;
 };
 
-export function ActivityFeed({ activities }: { activities: FeedActivity[] }) {
+export function ActivityFeed({
+  activities,
+  editableNoteIds = [],
+}: {
+  activities: FeedActivity[];
+  editableNoteIds?: string[];
+}) {
   if (activities.length === 0) {
     return <p className="text-sm text-muted-foreground">No collections activity on this account yet.</p>;
   }
@@ -37,6 +44,9 @@ export function ActivityFeed({ activities }: { activities: FeedActivity[] }) {
             <Badge variant={activity.status === "failed" ? "danger" : "muted"}>{activity.status}</Badge>
           </div>
           <ActivityDetail activity={activity} />
+          {activity.note && editableNoteIds.includes(activity.note.id) ? (
+            <NoteEditor noteId={activity.note.id} body={activity.note.body} />
+          ) : null}
           <p className="mt-2 text-xs text-muted-foreground">
             {activity.actorName} · {formatDate(activity.occurredOn)} ·{" "}
             <time dateTime={activity.createdAt.toISOString()}>{formatTime(activity.createdAt)}</time>

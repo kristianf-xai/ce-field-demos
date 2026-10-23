@@ -551,11 +551,11 @@ function reseedAndStart(report: Report) {
 function verifyTests(report: Report) {
   if (skipVerify || dryRun) return "skipped";
   const output = command("npm", ["test"], { allowFailure: true });
-  if (!/1 failed[\s\S]*39 passed|39 passed[\s\S]*1 failed/i.test(output)) {
-    throw new Error("The reset suite did not report the expected 1 failed / 39 passed result.");
+  if (!/1 failed[\s\S]*42 passed|42 passed[\s\S]*1 failed/i.test(output)) {
+    throw new Error("The reset suite did not report the expected 1 failed / 42 passed result.");
   }
-  report.completed.push("Confirmed the expected 1 failed / 39 passed test result.");
-  return "1 failed / 39 passed";
+  report.completed.push("Confirmed the expected 1 failed / 42 passed test result.");
+  return "1 failed / 42 passed";
 }
 
 async function cancelWithLinearApi(event: SessionEvent, report: Report) {

@@ -29,6 +29,17 @@ export const ACTIVITY_LABEL: Record<string, string> = {
   NOTE_ADDED: "Note added",
 };
 
+/** Stand-in for the PRD's unspecified edit window. Measured from createdAt, not the demo clock. */
+export const NOTE_EDIT_WINDOW_MS = 15 * 60 * 1000;
+
+export function canEditNote(
+  note: { authorName: string; createdAt: Date },
+  editorName: string,
+  now: Date = new Date(),
+) {
+  return note.authorName === editorName && now.getTime() - note.createdAt.getTime() < NOTE_EDIT_WINDOW_MS;
+}
+
 export function daysPastDue(invoice: Pick<InvoiceLike, "status" | "dueOn">, asOf: Date = DEMO_AS_OF) {
   if (invoice.status !== "OVERDUE") return 0;
   return Math.max(0, daysBetween(asOf, invoice.dueOn));
