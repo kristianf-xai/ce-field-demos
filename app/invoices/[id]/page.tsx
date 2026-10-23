@@ -9,7 +9,12 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { draftCollectionNote } from "@/lib/collection-note";
 import { DEMO_AS_OF } from "@/lib/clock";
-import { isPaymentMethod, outstandingCents, PAYMENT_METHOD_LABEL } from "@/lib/collections";
+import {
+  formatAmountForPlan,
+  isPaymentMethod,
+  outstandingCents,
+  PAYMENT_METHOD_LABEL,
+} from "@/lib/collections";
 import { getInvoice } from "@/lib/data";
 import { daysBetween, formatDate } from "@/lib/dates";
 import { formatUsd } from "@/lib/money";
@@ -124,7 +129,9 @@ export default async function InvoiceDetailPage({ params }: { params: Promise<{ 
             <CardHeader>
               <CardTitle>Payments</CardTitle>
               <CardDescription>
-                {outstanding > 0 ? `${formatUsd(outstanding)} outstanding` : "Nothing outstanding"}
+                {outstanding > 0
+                  ? `${formatAmountForPlan(invoice.plan, outstanding)} outstanding`
+                  : "Nothing outstanding"}
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
@@ -139,7 +146,9 @@ export default async function InvoiceDetailPage({ params }: { params: Promise<{ 
                         {isPaymentMethod(payment.method) ? PAYMENT_METHOD_LABEL[payment.method] : payment.method}
                         <span className="block text-xs text-muted-foreground">{payment.recordedBy}</span>
                       </span>
-                      <span className="font-medium">{formatUsd(payment.amountCents)}</span>
+                      <span className="font-medium">
+                        {formatAmountForPlan(invoice.plan, payment.amountCents)}
+                      </span>
                     </li>
                   ))}
                 </ul>

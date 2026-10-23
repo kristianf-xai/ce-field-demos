@@ -1,6 +1,19 @@
 import { describe, expect, it } from "vitest";
 import { demoDay } from "@/lib/clock";
-import { accountNudgeTarget } from "@/lib/collections";
+import { accountNudgeTarget, formatAmountForPlan, maskDollarFigures } from "@/lib/collections";
+
+describe("amount mask", () => {
+  it("formats catalog amounts and masks every other plan id, including figures inside a Nudge body", () => {
+    expect(formatAmountForPlan("SCALE", 24900)).toBe("$249.00");
+    expect(formatAmountForPlan("PILOT", 24900)).toBe("Upgrade to view amounts");
+
+    const body = "Invoice INV-1043 for $249.00 was due Aug 9, 2026 and is still open.";
+    expect(maskDollarFigures("GROWTH", body)).toBe(body);
+    expect(maskDollarFigures("PILOT", body)).toBe(
+      "Invoice INV-1043 for Upgrade to view amounts was due Aug 9, 2026 and is still open.",
+    );
+  });
+});
 
 describe("accountNudgeTarget", () => {
   it("picks the most-past-due overdue invoice and skips other statuses", () => {

@@ -1,6 +1,7 @@
 import { DEMO_AS_OF } from "@/lib/clock";
 import { daysBetween, formatDate } from "@/lib/dates";
 import { formatUsd, sumCents } from "@/lib/money";
+import { amountsVisible, MASKED_AMOUNT_LABEL } from "@/lib/plans";
 
 type InvoiceLike = {
   status: string;
@@ -51,6 +52,15 @@ export function overdueBook<T extends Pick<InvoiceLike, "status" | "dueOn">>(inv
   return invoices
     .filter((invoice) => invoice.status === "OVERDUE")
     .sort((a, b) => daysPastDue(b, asOf) - daysPastDue(a, asOf));
+}
+
+export function formatAmountForPlan(plan: string, cents: number) {
+  return amountsVisible(plan) ? formatUsd(cents) : MASKED_AMOUNT_LABEL;
+}
+
+/** Replaces dollar figures in stored copy, such as a Nudge body, for plans that cannot see amounts. */
+export function maskDollarFigures(plan: string, text: string) {
+  return amountsVisible(plan) ? text : text.replace(/\$[\d,]+(\.\d{2})?/g, MASKED_AMOUNT_LABEL);
 }
 
 /** The account-level Nudge goes to the most-past-due overdue invoice. */

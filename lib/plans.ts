@@ -22,6 +22,13 @@ export function isPlanId(value: string): value is PlanId {
   return (PLAN_IDS as readonly string[]).includes(value);
 }
 
+export const MASKED_AMOUNT_LABEL = "Upgrade to view amounts";
+
+/** Collections dollar figures show only on the paid catalog. Every other plan id sees the label instead. */
+export function amountsVisible(plan: string): boolean {
+  return isPlanId(plan);
+}
+
 export function planPriceCents(plan: string): number {
   if (!isPlanId(plan)) {
     throw new Error(`Unknown plan "${plan}". Catalog is Starter $49, Growth $99, Scale $249.`);

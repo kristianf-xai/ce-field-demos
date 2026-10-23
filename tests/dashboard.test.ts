@@ -35,6 +35,19 @@ describe("collectionsKpi", () => {
     expect(kpi.overdueCount).toBe(2);
   });
 
+  it("counts overdue invoices on other plan ids but keeps their amounts out of the total", () => {
+    const kpi = collectionsKpi(
+      [
+        { status: "OVERDUE", plan: "STARTER", totalCents: 4900 },
+        { status: "OVERDUE", plan: "PILOT", totalCents: 4900 },
+      ],
+      [],
+    );
+    expect(kpi.overdueCents).toBe(4900);
+    expect(kpi.overdueCount).toBe(2);
+    expect(kpi.maskedOverdueCount).toBe(1);
+  });
+
   it("counts activities on the demo day and in the 7 days ending it", () => {
     const kpi = collectionsKpi(
       [],

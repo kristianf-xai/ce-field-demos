@@ -18,13 +18,13 @@ import {
   accountNudgeTarget,
   canEditNote,
   daysPastDue,
+  formatAmountForPlan,
   overdueBook,
   outstandingCents,
 } from "@/lib/collections";
 import { getCustomerAccount } from "@/lib/data";
 import { formatDate } from "@/lib/dates";
 import { DEMO_OPERATOR } from "@/lib/demo-session";
-import { formatUsd } from "@/lib/money";
 import { isPlanId, planLabel } from "@/lib/plans";
 
 export const dynamic = "force-dynamic";
@@ -113,7 +113,7 @@ export default async function AccountDetailPage({ params }: { params: Promise<{ 
                       <TableCell className="text-muted-foreground">{formatDate(invoice.dueOn)}</TableCell>
                       <TableCell className="text-right">{daysPastDue(invoice)}</TableCell>
                       <TableCell className="text-right font-medium">
-                        {formatUsd(outstandingCents(invoice))}
+                        {formatAmountForPlan(customer.plan, outstandingCents(invoice))}
                       </TableCell>
                       <TableCell className="text-muted-foreground">{lastOn ? formatDate(lastOn) : "—"}</TableCell>
                       <TableCell>
@@ -138,7 +138,11 @@ export default async function AccountDetailPage({ params }: { params: Promise<{ 
             customerId={customer.id}
             invoices={customer.invoices.map((invoice) => ({ id: invoice.id, number: invoice.number }))}
           />
-          <ActivityFeed activities={customer.activities} editableNoteIds={editableNoteIds} />
+          <ActivityFeed
+            activities={customer.activities}
+            editableNoteIds={editableNoteIds}
+            plan={customer.plan}
+          />
         </CardContent>
       </Card>
     </div>

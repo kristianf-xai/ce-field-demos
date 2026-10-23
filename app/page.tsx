@@ -7,6 +7,7 @@ import { KpiCard } from "@/components/kpi-card";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { getDashboard } from "@/lib/data";
 import { formatUsd } from "@/lib/money";
+import { MASKED_AMOUNT_LABEL } from "@/lib/plans";
 
 export const metadata = {
   title: "Dashboard",
@@ -17,6 +18,7 @@ export const dynamic = "force-dynamic";
 
 export default async function DashboardPage() {
   const { invoices, series, breakdown, kpis } = await getDashboard();
+  const collections = kpis.collections;
   const recent = invoices.filter((invoice) => invoice.status !== "VOID" && invoice.status !== "DRAFT").slice(0, 5);
 
   return (
@@ -71,8 +73,19 @@ export default async function DashboardPage() {
       <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
         <KpiCard
           label="Collections"
-          value={formatUsd(kpis.collections.overdueCents)}
-          hint={`${kpis.collections.overdueCount} overdue ${kpis.collections.overdueCount === 1 ? "invoice" : "invoices"} · ${kpis.collections.activitiesToday} ${kpis.collections.activitiesToday === 1 ? "activity" : "activities"} on Aug 23 · ${kpis.collections.activitiesThisWeek} in the last 7 days`}
+          value={
+            collections.maskedOverdueCount > 0 && collections.maskedOverdueCount === collections.overdueCount
+              ? MASKED_AMOUNT_LABEL
+              : formatUsd(collections.overdueCents)
+          }
+          hint={[
+            `${collections.overdueCount} overdue ${collections.overdueCount === 1 ? "invoice" : "invoices"}`,
+            `${collections.activitiesToday} ${collections.activitiesToday === 1 ? "activity" : "activities"} on Aug 23`,
+            `${collections.activitiesThisWeek} in the last 7 days`,
+            ...(collections.maskedOverdueCount > 0
+              ? [`${collections.maskedOverdueCount} on other plans: ${MASKED_AMOUNT_LABEL}`]
+              : []),
+          ].join(" · ")}
           icon={Inbox}
           tone="danger"
         />

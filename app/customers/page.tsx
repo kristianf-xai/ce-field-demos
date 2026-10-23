@@ -9,9 +9,9 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { overdueBook, outstandingCents } from "@/lib/collections";
+import { formatAmountForPlan, overdueBook, outstandingCents } from "@/lib/collections";
 import { getCustomers } from "@/lib/data";
-import { formatUsd, sumCents } from "@/lib/money";
+import { sumCents } from "@/lib/money";
 import { isPlanId, planLabel } from "@/lib/plans";
 
 export const metadata = {
@@ -58,7 +58,7 @@ export default async function CustomersPage() {
                     </TableCell>
                     <TableCell className="text-right">{overdue.length}</TableCell>
                     <TableCell className="text-right font-medium">
-                      {formatUsd(sumCents(overdue.map(outstandingCents)))}
+                      {formatAmountForPlan(customer.plan, sumCents(overdue.map(outstandingCents)))}
                     </TableCell>
                   </TableRow>
                 );

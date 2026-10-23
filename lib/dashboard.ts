@@ -1,7 +1,7 @@
 import { DEMO_AS_OF, DEMO_PRIOR_END, DEMO_PRIOR_START, DEMO_WINDOW_START } from "@/lib/clock";
 import { outstandingCents } from "@/lib/collections";
 import { sumCents } from "@/lib/money";
-import { isPlanId, planPriceCents } from "@/lib/plans";
+import { amountsVisible, planPriceCents } from "@/lib/plans";
 
 type InvoiceLike = {
   status: string;
@@ -111,15 +111,18 @@ export function collectionsKpi(
   activities: { occurredOn: Date }[],
   asOf: Date = DEMO_AS_OF,
 ) {
-  const overdue = invoices.filter((invoice) => invoice.status === "OVERDUE" && isPlanId(invoice.plan));
+  const overdue = invoices.filter((invoice) => invoice.status === "OVERDUE");
+  const catalogOverdue = overdue.filter((invoice) => amountsVisible(invoice.plan));
   const weekStart = new Date(asOf);
   weekStart.setUTCDate(weekStart.getUTCDate() - 6);
   const today = utcDay(asOf);
   const firstDay = utcDay(weekStart);
 
   return {
-    overdueCents: sumCents(overdue.map(outstandingCents)),
+    overdueCents: sumCents(catalogOverdue.map(outstandingCents)),
     overdueCount: overdue.length,
+    /** Overdue invoices on a plan that cannot see amounts. Counted, but kept out of overdueCents. */
+    maskedOverdueCount: overdue.length - catalogOverdue.length,
     activitiesToday: activities.filter((activity) => utcDay(activity.occurredOn) === today).length,
     activitiesThisWeek: activities.filter((activity) => {
       const day = utcDay(activity.occurredOn);

@@ -1,8 +1,13 @@
 import { NoteEditor } from "@/components/collections/note-editor";
 import { Badge } from "@/components/ui/badge";
-import { ACTIVITY_LABEL, isPaymentMethod, PAYMENT_METHOD_LABEL } from "@/lib/collections";
+import {
+  ACTIVITY_LABEL,
+  formatAmountForPlan,
+  isPaymentMethod,
+  maskDollarFigures,
+  PAYMENT_METHOD_LABEL,
+} from "@/lib/collections";
 import { formatDate, formatTime } from "@/lib/dates";
-import { formatUsd } from "@/lib/money";
 
 export type FeedActivity = {
   id: string;
@@ -21,9 +26,11 @@ export type FeedActivity = {
 
 export function ActivityFeed({
   activities,
+  plan,
   editableNoteIds = [],
 }: {
   activities: FeedActivity[];
+  plan: string;
   editableNoteIds?: string[];
 }) {
   if (activities.length === 0) {
@@ -43,7 +50,7 @@ export function ActivityFeed({
             </p>
             <Badge variant={activity.status === "failed" ? "danger" : "muted"}>{activity.status}</Badge>
           </div>
-          <ActivityDetail activity={activity} />
+          <ActivityDetail activity={activity} plan={plan} />
           {activity.note && editableNoteIds.includes(activity.note.id) ? (
             <NoteEditor noteId={activity.note.id} body={activity.note.body} />
           ) : null}
@@ -57,7 +64,7 @@ export function ActivityFeed({
   );
 }
 
-function ActivityDetail({ activity }: { activity: FeedActivity }) {
+function ActivityDetail({ activity, plan }: { activity: FeedActivity; plan: string }) {
   if (activity.type === "NOTE_ADDED" && activity.note) {
     return <p className="mt-1 text-sm whitespace-pre-line">{activity.note.body}</p>;
   }
@@ -65,7 +72,7 @@ function ActivityDetail({ activity }: { activity: FeedActivity }) {
     const method = isPaymentMethod(activity.method) ? PAYMENT_METHOD_LABEL[activity.method] : activity.method;
     return (
       <p className="mt-1 text-sm">
-        {formatUsd(activity.amountCents)} by {method}
+        {formatAmountForPlan(plan, activity.amountCents)} by {method}
       </p>
     );
   }
@@ -73,9 +80,13 @@ function ActivityDetail({ activity }: { activity: FeedActivity }) {
     return (
       <div className="mt-1 space-y-1 text-sm">
         <p className="text-xs text-muted-foreground">Channel: {activity.channel ?? "email"}</p>
-        {activity.detail ? <p className="whitespace-pre-line">{activity.detail}</p> : null}
+        {activity.detail ? (
+          <p className="whitespace-pre-line">{maskDollarFigures(plan, activity.detail)}</p>
+        ) : null}
       </div>
     );
   }
-  return activity.detail ? <p className="mt-1 text-sm whitespace-pre-line">{activity.detail}</p> : null;
+  return activity.detail ? (
+    <p className="mt-1 text-sm whitespace-pre-line">{maskDollarFigures(plan, activity.detail)}</p>
+  ) : null;
 }

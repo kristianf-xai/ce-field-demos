@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { PLAN_PRICE_CENTS, planLabel, planPriceCents } from "@/lib/plans";
+import { amountsVisible, PLAN_PRICE_CENTS, planLabel, planPriceCents } from "@/lib/plans";
 
 describe("plan catalog", () => {
   it("exposes only the three demo prices", () => {
@@ -17,5 +17,13 @@ describe("plan catalog", () => {
 
   it("refuses unknown plans instead of inventing a price", () => {
     expect(() => planPriceCents("ENTERPRISE")).toThrow(/Unknown plan/);
+  });
+
+  it("shows collections amounts only on the three catalog plans", () => {
+    for (const plan of ["STARTER", "GROWTH", "SCALE"]) {
+      expect(amountsVisible(plan)).toBe(true);
+    }
+    expect(amountsVisible("PILOT")).toBe(false);
+    expect(amountsVisible("")).toBe(false);
   });
 });
