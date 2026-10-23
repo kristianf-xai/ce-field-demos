@@ -85,6 +85,22 @@ describe("POST /api/invoices/[id]/payments", () => {
     expect(after.payments).toHaveLength(0);
   });
 
+  it("returns 400 and stores nothing when amountCents is not the outstanding balance", async () => {
+    const invoice = await prisma.invoice.findUniqueOrThrow({ where: { id: INVOICE_ID } });
+    for (const amountCents of [invoice.totalCents - 100, invoice.totalCents + 100, "all"]) {
+      const response = await post(INVOICE_ID, { method: "cash", amountCents });
+      expect(response.status).toBe(400);
+    }
+
+    const after = await prisma.invoice.findUniqueOrThrow({
+      where: { id: INVOICE_ID },
+      include: { payments: true, activities: true },
+    });
+    expect(after.status).toBe("OVERDUE");
+    expect(after.payments).toHaveLength(0);
+    expect(after.activities).toHaveLength(0);
+  });
+
   it("rejects a method outside check, ach, card_on_file, and cash", async () => {
     const response = await post(INVOICE_ID, { method: "wire" });
     expect(response.status).toBe(400);

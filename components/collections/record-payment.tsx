@@ -63,6 +63,12 @@ export function RecordPayment({
 
   return (
     <div className="space-y-3">
+      <p className="text-sm">
+        Amount: <span className="font-medium">{amountLabel}</span>
+        <span className="block text-xs text-muted-foreground">
+          Full outstanding balance only. Partial payments are not supported.
+        </span>
+      </p>
       <div className="space-y-1.5">
         <Label htmlFor="payment-method">Payment method</Label>
         <select

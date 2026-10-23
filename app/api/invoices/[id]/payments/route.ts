@@ -35,6 +35,15 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     );
   }
 
+  if (body.amountCents !== undefined && body.amountCents !== amountCents) {
+    return NextResponse.json(
+      {
+        error: `Only the full outstanding balance can be recorded against ${invoice.number}. Partial payments are not supported.`,
+      },
+      { status: 400 },
+    );
+  }
+
   const payment = await prisma.$transaction(async (tx) => {
     const created = await tx.payment.create({
       data: {
