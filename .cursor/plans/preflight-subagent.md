@@ -51,7 +51,7 @@ Run these for `101`, `201`, and `301`:
 | Prisma client | Probe only — e.g. `node -e "require.resolve('@prisma/client')"` or an import check. Do **not** run `npx prisma generate`. | `@prisma/client` resolves; remediation may name `npx prisma generate` without running it |
 | SQLite seed | same probe as `start-ledgerly` (`customer.count()` via `tsx`) | `seeded` (count > 0) |
 | Dev server | `curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:43173` | 2xx/3xx |
-| Shipped suite shape | `npm test` (or vitest summary) | **1 failed / 47 passed**; sole red file `tests/suggested-credit-api.test.ts` |
+| Shipped suite shape | `npm test` (or vitest summary) | **1 failed / 49 passed**; sole red file `tests/suggested-credit-api.test.ts` |
 | Planted demo error | GET dispute page or suggested-credit v1 path for `dsp_1043` when server is up | Suggested credit still shows the v1 $400 claim (do not "fix" it) |
 | Empty project MCP map | read `.cursor/mcp.json` | `{}` / no `ledgerly-db`; no `mcp/` directory |
 | Project agents present | paths under `.cursor/agents/` | baseline agents exist (see track matrix for which are required) |
